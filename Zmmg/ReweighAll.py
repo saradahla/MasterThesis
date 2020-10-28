@@ -7,13 +7,7 @@ Created on Tuesday 30 June
 
 Reweighing the data and adding the PID and ISO scores to the data
 
-nohup python -u ReweighAll.py --tag 110820_ZbbW  output/MuoPairHdf5/110820_ZbbW/110820_ZbbW.h5 2>&1 &> output/logZReweight.txt & disown
-
-nohup python -u ReweighAll.py --tag 260820_ZbbW  output/MuoPairHdf5/260820_ZbbW/260820_ZbbW.h5 2>&1 &> output/logZReweight.txt & disown
-
-nohup python -u ReweighAll.py --tag 220920_ZbbW  output/MuoPairHdf5/220920_ZbbW/220920_ZbbW.h5 2>&1 &> output/logZReweight.txt & disown
-
-nohup python -u ReweighAll.py --tag 131020_ZbbW  output/MuoPairHdf5/131020_ZbbW/131020_ZbbW.h5 2>&1 &> output/logZReweight.txt & disown
+nohup python -u ReweighAll.py --tag 20201028  output/MuoPairGammaDataset/110820_ZbbW/110820_ZbbW.h5 2>&1 &> output/logZReweight.txt & disown
 
 """
 print("Program running...")
@@ -86,8 +80,11 @@ else:
 # File number counter (incremented first in loop)
 counter = -1
 
-modelPID = "/groups/hep/sda/work/Zmm model/PID_ISO_models/output/PIDModels/010920_ZbbW/lgbmPID.txt"
-modelISO = "/groups/hep/sda/work/Zmm model/PID_ISO_models/output/ISOModels/110820_ZbbW/lgbmISO.txt"
+modelPIDmu = "/groups/hep/sda/work/MasterThesis/Zmm model/PID_ISO_models/output/PIDModels/010920_ZbbW/lgbmPID.txt"
+modelISOmu = "/groups/hep/sda/work/MasterThesis/Zmm model/PID_ISO_models/output/ISOModels/110820_ZbbW/lgbmISO.txt"
+modelZ = "/groups/hep/sda/work/MasterThesis/Zmm model/Z_model/output/ZModels/081020_1/lgbmZ.txt"
+modelPIDpho = "/groups/hep/sda/work/MasterThesis/Zmmg/output/phoPIDModels/20201028/lgbm_phoPID.txt"
+modelISOpho = "/groups/hep/sda/work/MasterThesis/Zmmg/output/phoISOModels/20201028/lgbm_phoISO.txt"
 
 # ================================================ #
 #                   Functions                      #
@@ -111,7 +108,7 @@ def getRegularWeights(datatype, reweighter, data):
     total_weight = reweighter.predict_weights(np.array([data['eta'][data['label'] < 0.5],
                                                         data['pt'][data['label'] < 0.5],
                                                         data['invM'][data['label'] < 0.5],
-                                                        data['correctedScaledAverageMu'][data['label'] < 0.5]]).T)
+                                                        data['correctedScaledActualMu'][data['label'] < 0.5]]).T)
     log.info(f'Prediction of weights for {datatype} is done')
 
     # Get the ratio of sig and bkg weights to scale the bkg to have the same number of events ( after weighting )
@@ -139,7 +136,7 @@ def getReverseWeights(datatype, reweighter, data):
     total_weight = reweighter.predict_weights(np.array([data['eta'][data['label'] > 0.5],
                                                         data['pt'][data['label'] > 0.5],
                                                         data['invM'][data['label'] > 0.5],
-                                                        data['correctedScaledAverageMu'][data['label'] > 0.5]]).T)
+                                                        data['correctedScaledActualMu'][data['label'] > 0.5]]).T)
     log.info(f'Prediction of weights for {datatype} is done')
 
     # Get the ratio of sig and bkg weights to scale the signal to have the same number of events ( after weighting )
@@ -184,6 +181,56 @@ def GetPIDscoreMu(gbm, data, muoNr):
                     f'muo{muoNr}_momentumBalanceSignificance', # PID
                     f'muo{muoNr}_EnergyLoss', # PID
                     f'muo{muoNr}_energyLossType']
+
+    score = gbm.predict(data[training_var], n_jobs=args.max_processes)
+    return logit(score)
+
+def GetZscore(gbm, data):
+    training_var = [f'correctedScaledAverageMu',
+                    f'NvtxReco',
+                    f'Z_sig',
+                    f'muo1_PID_score',
+                    f'muo1_ISO_score',
+                    f'muo1_d0_d0Sig',
+                    f'muo1_priTrack_d0', # PID
+                    f'muo1_priTrack_z0', # PID
+                    f'muo2_PID_score',
+                    f'muo2_ISO_score',
+                    f'muo2_d0_d0Sig',
+                    f'muo2_priTrack_d0', # PID
+                    f'muo2_priTrack_z0', # PID]
+
+    score = gbm.predict(data[training_var], n_jobs=args.max_processes)
+    return logit(score)
+
+def GetISOscorePho(gbm, data):
+    training_var = ['correctedScaledActualMu',
+                    'NvtxReco',
+                    'pho_et',
+                    'pho_topoetcone20',
+                    'pho_topoetcone40',
+                    'pho_ptvarcone20']
+    score = gbm.predict(data[training_var], n_jobs=args.max_processes)
+    return logit(score)
+
+def GetPIDscorePho(gbm, data):
+    training_var = ['correctedScaledActualMu',
+                    'pho_eta',
+                    'pho_Rhad1',
+                    'pho_Rhad',
+                    'pho_weta2',
+                    'pho_Rphi',
+                    'pho_Reta',
+                    'pho_Eratio',
+                    'pho_wtots1',
+                    'pho_DeltaE',
+                    'pho_weta1',
+                    'pho_fracs1',
+                    'pho_f1',
+                    'pho_ConversionType',
+                    'pho_ConversionRadius',
+                    'pho_VertexConvEtOverPt',
+                    'pho_VertexConvPtRatio']
 
     score = gbm.predict(data[training_var], n_jobs=args.max_processes)
     return logit(score)
@@ -239,22 +286,36 @@ log.info(f"Shape background: {shapeBkg}")
 
 # Add Z_sig
 data['Z_sig'] = (data['muo1_priTrack_z0'] - data['muo2_priTrack_z0'])/np.sqrt(data['muo1_priTrack_z0Sig']**2 + data['muo2_priTrack_z0Sig']**2)
-data['muo1_d0_d0Sig'] = data['muo1_priTrack_d0']/data['muo1_priTrack_d0Sig']
-data['muo2_d0_d0Sig'] = data['muo2_priTrack_d0']/data['muo2_priTrack_d0Sig']
+# data['muo1_d0_d0Sig'] = data['muo1_priTrack_d0']/data['muo1_priTrack_d0Sig']
+# data['muo2_d0_d0Sig'] = data['muo2_priTrack_d0']/data['muo2_priTrack_d0Sig']
+data["pho_isConv"] = 0
+data.loc[data["pho_ConversionType"]!=0,"pho_isConv"] = 1
+
 
 # Add ML isolation
 log.info(f"Add ML models score to data")
-log.info(f"        Muon models: {modelPID}")
-log.info(f"                     {modelISO}")
+log.info(f"        Muon models:     {modelPIDmu}")
+log.info(f"                         {modelISOmu}")
+log.info(f"        Z model:         {modelZ}")
+log.info(f"        Photon models:   {modelPIDpho}")
+log.info(f"                         {modelISOpho}")
 
-PIDmod = lgb.Booster(model_file = modelPID)
-ISOmod = lgb.Booster(model_file = modelISO)
+PIDmodMu = lgb.Booster(model_file = modelPIDmu)
+ISOmodMu = lgb.Booster(model_file = modelISOmu)
+Zmod = lgb.Booster(model_file = modelZ)
+PIDmodPho = lgb.Booster(model_file = modelPIDpho)
+ISOmodPho = lgb.Booster(model_file = modelISOpho)
 
-data['muo1_PID_score'] = GetPIDscoreMu(PIDmod,data,1)
-data['muo2_PID_score'] = GetPIDscoreMu(PIDmod,data,2)
+data['muo1_PID_score'] = GetPIDscoreMu(PIDmodMu,data,1)
+data['muo2_PID_score'] = GetPIDscoreMu(PIDmodMu,data,2)
 
-data['muo1_ISO_score'] = GetISOscoreMu(ISOmod,data,1)
-data['muo2_ISO_score'] = GetISOscoreMu(ISOmod,data,2)
+data['muo1_ISO_score'] = GetISOscoreMu(ISOmodMu,data,1)
+data['muo2_ISO_score'] = GetISOscoreMu(ISOmodMu,data,2)
+
+data['Z_score'] = GetZscore(ISOmodMu,data)
+
+data['pho_ISO_score'] = GetISOscorePho(ISOmodPho,data)
+data['pho_ISO_score'] = GetISOscorePho(ISOmodPho,data)
 
 #============================================================================
 # Split in train, valid and test set
@@ -354,11 +415,11 @@ for iWeight, weightName in enumerate(reweightNames):
     reweighter.fit(original = np.array([data_train['eta'][trainMask & (data_train["label"] < 0.5)],
                                         data_train['pt'][trainMask & (data_train["label"] < 0.5)],
                                         data_train['invM'][trainMask & (data_train["label"] < 0.5)],
-                                        data_train['correctedScaledAverageMu'][trainMask & (data_train["label"] < 0.5)]]).T,
+                                        data_train['correctedScaledActualMu'][trainMask & (data_train["label"] < 0.5)]]).T,
                    target   = np.array([data_train['eta'][trainMask & (data_train["label"] >= 0.5)],
                                         data_train['pt'][trainMask & (data_train["label"] >= 0.5)],
                                         data_train['invM'][trainMask & (data_train["label"] >= 0.5)],
-                                        data_train['correctedScaledAverageMu'][trainMask & (data_train["label"] >= 0.5)]]).T)
+                                        data_train['correctedScaledActualMu'][trainMask & (data_train["label"] >= 0.5)]]).T)
     log.info(f"Fitting of weights is done (time: {timedelta(seconds=time() - t)})")
 
     # Get weights
@@ -397,11 +458,11 @@ for iWeight, weightName in enumerate(reweightNames):
     reweighter.fit(original = np.array([data_train['eta'][trainMask & (data_train["label"] > 0.5)],
                                         data_train['pt'][trainMask & (data_train["label"] > 0.5)],
                                         data_train['invM'][trainMask & (data_train["label"] > 0.5)],
-                                        data_train['correctedScaledAverageMu'][trainMask & (data_train["label"] > 0.5)]]).T,
+                                        data_train['correctedScaledActualMu'][trainMask & (data_train["label"] > 0.5)]]).T,
                    target   = np.array([data_train['eta'][trainMask & (data_train["label"] <= 0.5)],
                                         data_train['pt'][trainMask & (data_train["label"] <= 0.5)],
                                         data_train['invM'][trainMask & (data_train["label"] <= 0.5)],
-                                        data_train['correctedScaledAverageMu'][trainMask & (data_train["label"] <= 0.5)]]).T)
+                                        data_train['correctedScaledActualMu'][trainMask & (data_train["label"] <= 0.5)]]).T)
     log.info(f"Fitting of weights is done (time: {timedelta(seconds=time() - t)})")
 
     # Get weights
@@ -447,7 +508,7 @@ with h5py.File(filename_test, 'w') as hf:
 masks = [trainMask, validMask]
 maskNames = ["train", "valid"]
 maskLabel = ["Training set", "Validation set"]
-variables = ["eta", "pt", "invM", "correctedScaledAverageMu"]
+variables = ["eta", "pt", "invM", "correctedScaledActualMu"]
 bins = [120, 120, 120, 80]
 ranges = [(-4, 4), (-5, 120), (50, 110), (-2, 80)]
 xlabel = [r"$\eta$", "pt", "invM", r"$\langle\mu\rangle$"]
