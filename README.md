@@ -1,6 +1,6 @@
-# MasterThesis
+# Master's Thesis
 
-This repository contains scripts and files used for my master thesis project. 
+This repository contains scripts and files used for my master's thesis project. 
 The project combines machine learning and particle physics as I have created several models using LightGBM to optimize the finding of the Z boson and Higgs particle. 
 
 The following folders exist:
