@@ -5,13 +5,12 @@
 Created on Tuesday 30 June
 @author: Sara Dahl Andersen
 
-Running my Z model for muons and outputting the score
+Running my Zmmg model for muons and photons and outputting the score
 
-nohup python -u muoZapply.py --tag 110820_ZbbW  output/ZReweightFiles/110820_ZbbW/combined_110820_train.h5 2>&1 &> output/logZApply.txt & disown
-nohup python -u muoZapply.py --tag 150920_ZbbW  output/ZReweightFiles/260820_ZbbW/combined_260820_train.h5 2>&1 &> output/logZApply_150920.txt & disown
-nohup python -u muoZapply.py --tag 220920_ZbbW  output/ZReweightFiles/220920_ZbbW/combined_220920_train.h5 2>&1 &> output/logZApply_220920.txt & disown
-nohup python -u muoZapply.py --tag 250920  output/ZReweightFiles/220920_ZbbW/combined_220920_train.h5 2>&1 &> output/logZApply_250920.txt & disown
-nohup python -u muoZapply.py --tag 081020  output/ZReweightFiles/220920_ZbbW/combined_220920_train.h5 2>&1 &> output/logZApply_081020.txt & disown
+nohup python -u ZmmgApply.py --tag 20201029  output/ZmmgReweightFiles/20201028/combined_20201028_train.h5 2>&1 &> output/logZApply20201028.txt & disown
+nohup python -u ZmmgApply.py --tag 20201029  output/ZmmgReweightFiles/20201029/combined_Zmmgam20201029_train.h5 2>&1 &> output/logZApply20201029.txt & disown
+nohup python -u ZmmgApply.py --tag 20201030  --hypopt 1 output/ZmmgReweightFiles/20201029/combined_Zmmgam20201029_train.h5 2>&1 &> output/logZApply20201030.txt & disown
+nohup python -u ZmmgApply.py --tag 20201103_2  --hypopt 0 output/ZmmgReweightFiles/20201103/combined_Zmmgam20201103ZmmEGAM420201103_train.h5 2>&1 &> output/logZApply20201103.txt & disown
 
 """
 print("Program running...")
@@ -32,11 +31,14 @@ from sklearn.model_selection import train_test_split
 
 from utils import mkdir
 from hep_ml.reweight import GBReweighter
+from scipy.stats import randint
 
 from sklearn.utils import shuffle
-from sklearn.metrics import roc_curve, auc, roc_auc_score
+from sklearn.metrics import roc_curve, auc, roc_auc_score, confusion_matrix
 import shap
 import lightgbm as lgb
+from Zee_functions_HKLE import h5ToDf, accuracy, HyperOpt_RandSearch, auc_eval, HeatMap_rand, PlotRandomSearch
+
 
 
 
@@ -58,6 +60,10 @@ parser.add_argument('--tag', action='store', type=str, required=False, default="
                     help='Tag the data category (Zee, Wev, etc.).')
 parser.add_argument('--njobs', action='store', default=10, type=int,
                     help='Maximum number of concurrent processes to use.')
+parser.add_argument('--hypopt', action='store', default=0, type=int,
+                    help='Should hyperparameters be optimized?')
+parser.add_argument('--hypParam', action='store', type=str, required=False, default="",
+                    help='Input hyperparameters: What directory to load hyperparameters from, used in combination with --hypopt = 2.')
 
 
 args = parser.parse_args()
@@ -69,6 +75,11 @@ if not args.path:
 
 if args.njobs > 20:
     log.error("The requested number of jobs ({}) is excessive (>20). Exiting.".format(args.njobs))
+    quit()
+
+
+if ( (args.hypopt == 2) & (args.hypParam == "")):
+    log.error("Path to input hyperparameters missing (--hypParam)")
     quit()
 
 # Make and set the output directory to tag, if it doesn't already exist
@@ -200,10 +211,10 @@ def GetATLASCut(data):
              ( abs(data['muo2_d0_d0Sig']) < 3 ) &
              ### photon cuts
              ( abs(data['pho_et']) > 10 ) &
-             ( (np.abs( data['pho_eta']) < 2.7)) &
-             ( (np.abs( data['pho_eta']) < 2.7)) &
-             ( (np.abs( data['pho_eta']) < 1.37) or (np.abs( data['pho_eta']) > 2.47)) &
-             ( data['pho_isPhotonEMLoose'] )
+             # ( (np.abs( data['pho_eta']) < 2.7)) &
+             # ( (np.abs( data['pho_eta']) < 2.7)) &
+             ( (np.abs( data['pho_eta'] ) < 1.37) | ((np.abs( data['pho_eta'] ) > 1.52) & (np.abs( data['pho_eta'] ) < 2.37))) &
+             ( data['pho_isPhotonEMTight'] )
              )
 #
 # def GetPIDCut(data, MLpidSel):
@@ -249,7 +260,7 @@ def getMLcut(data, maskFunction,selStart,decimals=4):
     #predSel = pd.DataFrame(data=np.zeros(len(dataSel)))
     #predSel.loc[dataSel[maskFunction(dataSel,Sel)].index,0] = 1
 
-    #fprSel, tprSel, thresholdsSel = roc_curve(y_valid, predSel[:][0], sample_weight=data_valid["regWeight_nEst10"])
+    #fprSel, tprSel, thresholdsSel = roc_curve(y_valid, predSel[:][0], sample_weight=data_valid["regWeight_nEst30"])
     #aucSel = auc(fprSel, tprSel)
 
     #fprSelCompare = fprSel[1]; tprSelCompare = tprSel[1]
@@ -267,7 +278,7 @@ def getMLcut(data, maskFunction,selStart,decimals=4):
         # Calculate new fpr and tpr
         # predSel = pd.DataFrame(data=np.zeros(len(dataSel)))
         # predSel.loc[dataSel[maskFunction(dataSel,Sel)].index,0] = 1
-        # fprSel, tprSel, thresholdsSel = roc_curve(y_valid, predSel[:][0], sample_weight=data_valid["regWeight_nEst10"])
+        # fprSel, tprSel, thresholdsSel = roc_curve(y_valid, predSel[:][0], sample_weight=data_valid["regWeight_nEst30"])
         # aucSel = auc(fprSel, tprSel)
         nBkgCompare = np.sum( (  (data[truth_var]==0) & maskFunction(data, Sel) ) )
         nSigCompare = np.sum( (  (data[truth_var]==1) & maskFunction(data, Sel) ) )
@@ -745,26 +756,118 @@ y_valid = data_valid[truth_var]
 
 
 # create LGBM dataset
-print("We are using the weights: regWeight_nEst10")
-train_dataset = lgb.Dataset(X_train, label=y_train, weight=data_train["regWeight_nEst10"])
-valid_dataset = lgb.Dataset(X_valid, label=y_valid, weight=data_valid["regWeight_nEst10"])
+print("We are using the weights: regWeight_nEst30")
+train_dataset = lgb.Dataset(X_train, label=y_train, weight=data_train["regWeight_nEst30"])
+valid_dataset = lgb.Dataset(X_valid, label=y_valid, weight=data_valid["regWeight_nEst30"])
 
-params = {
+
+params_set = {
               'boosting_type': 'gbdt',        # Default gbdt (traditional Gradient Boosting Decision Tree)
               'objective': 'binary',          # Probability labeĺs in [0,1]
               'boost_from_average': True,
               'verbose': 0,                   # < 0: Fatal, = 0: Error (Warning), = 1: Info, > 1: Debug
               'num_threads': args.njobs,
-              'learning_rate':0.1,
-              'num_leaves': 30,
-              'max_depth': -1,
               }
+
+
+hyperopt_options = {0 : "Use standard hyperparameters",
+                    1 : "Run hyperparameter optimization",
+                    2 : f"Use preoptimized hyperparameters from {args.hypParam}"}
+
+
+#============================================================================
+# Hyperparameter optimization
+#============================================================================
+
+if (args.hypopt == 0):
+    print("USING STANDARD HYPERPARAMETERS ...")
+    # header(f"Hyper Parameter Tuning: {hyperopt_options[args.hypopt]}")
+    params_add = {
+        'num_leaves': 30,
+        'max_depth': -1,
+        'min_data_in_leaf': 30,
+        'feature_fraction': 1.0,
+        'bagging_fraction': 1.0,
+        'bagging_freq': 0}
+
+elif (args.hypopt == 1):
+    print("RUNNING HYPERPARAMETER OPTIMIZATION ...")
+
+    t = time()
+
+    # Set ranges for random search
+    n_iter = 20
+    n_fold = 5
+    l_rate = 0.1
+    n_boost_round = 500
+    e_stop_round = 100
+    params_grid = {
+        'num_leaves': randint(20,40),                    # Important! Default: 31, set to less than 2^(max_depth)
+        'max_depth': randint(-20,20),                       # Important! Default: -1, <= 0 means no limit
+        'min_data_in_leaf': randint(10,100),              # Important! Default: 20
+        'feature_fraction': [1.0],                        # Default: 1.0, random selection if it is under 1 eg. 80% of features for 0.8, helps with: speed up, over-fitting
+        'bagging_fraction': [1.0],                        # Default: 1.0
+        'bagging_freq': [0],                              # Default: 0, bags data, should be combined vith bagging_fraction
+        }
+
+    # Perform random search
+    best, df_cv = HyperOpt_RandSearch(train_dataset,
+                             params_set,
+                             params_grid,
+                             learning_rate=l_rate,
+                             n_iter=n_iter,
+                             n_fold=n_fold,
+                             n_boost_round=n_boost_round,
+                             e_stop_round=e_stop_round,
+                             verbose=False)
+
+    params_add = df_cv['params'][best]
+    print(f"Best iteration: [{best}/{n_iter}]")
+
+    # Save best hyperparameters
+    print('Saving best hyperparameters...')
+    np.save(args.outdir + "hypParam" + args.tag + "_best.npy", params_add)
+
+    # Save all hyperparameters
+    print('Saving best hyperparameters...')
+    params_return = np.array(df_cv[['cv_mean', 'cv_stdv', 'num_boost_round','num_leaves','min_data_in_leaf','max_depth']])
+    np.savetxt(args.outdir + "hypParam" + args.tag + ".txt", params_return)
+
+    # Plot all hyperparameters
+    print('Plotting hyperparameters...')
+    rand_param = df_cv[['cv_mean', 'cv_stdv', 'num_boost_round','num_leaves','min_data_in_leaf','max_depth']]
+
+    range_num_leaves = np.arange(20, 41, 1).astype(int)
+    range_min_data_in_leaf = np.arange(10, 101, 1).astype(int)
+    range_max_depth = np.arange(-20,21,1).astype(int)
+
+    # fig, ax = plt.subplots(1,2,figsize=(7,5),sharey=True)
+    # ax = ax.flatten()
+    # HeatMap_rand(fig,ax[0],rand_param["cv_mean"],rand_param["cv_stdv"],rand_param["min_data_in_leaf"],rand_param["num_leaves"], range_min_data_in_leaf, range_num_leaves)
+    # HeatMap_rand(fig,ax[1],rand_param["cv_mean"],rand_param["cv_stdv"],rand_param["max_depth"],rand_param["num_leaves"], range_max_depth, range_num_leaves)
+    # fig.suptitle("Random search - negative AUC")
+    # ax[0].set_ylabel("num_leaves")
+    # ax[0].set_xlabel("min_data_in_leaf")
+    # ax[1].set_xlabel("max_depth")
+    #
+    # fig.tight_layout(h_pad=0.3, w_pad=0.3)
+    fig = PlotRandomSearch(rand_param["cv_mean"],rand_param["cv_stdv"], rand_param["min_data_in_leaf"], rand_param["max_depth"], rand_param["num_leaves"], range_min_data_in_leaf, range_max_depth, range_num_leaves)
+    fig.savefig(args.outdir + "RandSearch.png")
+
+
+elif (args.hypopt == 2):
+    print("IMPORTING HYPERPARAMETERS ...")
+
+    print(f"Importing parameters from: {args.hypParam}")
+    params_add = np.load( args.hypParam, allow_pickle='TRUE').item()
+
+params = params_set
+params.update(params_add)
 
 print(f"Parameters:")
 keys = list(params.keys())
 for i in range(len(keys)):
     print(f"        {keys[i]}: {params[keys[i]]}")
-
 
 
 #============================================================================
@@ -803,16 +906,16 @@ print(f"        Validation: {roc_auc_score(y_valid, y_pred_valid):.6f}")
 ###############################################################################
 
 # First we get the ROC / AUC Scores
-fpr_train, tpr_train, thresholds_train = roc_curve(y_train, y_pred_train, sample_weight=data_train["regWeight_nEst10"])
+fpr_train, tpr_train, thresholds_train = roc_curve(y_train, y_pred_train, sample_weight=data_train["regWeight_nEst30"])
 auc_train = auc(fpr_train, tpr_train)
 
-fpr_valid, tpr_valid, thresholds_valid = roc_curve(y_valid, y_pred_valid, sample_weight=data_valid["regWeight_nEst10"])
+fpr_valid, tpr_valid, thresholds_valid = roc_curve(y_valid, y_pred_valid, sample_weight=data_valid["regWeight_nEst30"])
 auc_valid = auc(fpr_valid, tpr_valid)
 
-fpr_ATLAS_train, tpr_ATLAS_train, thresholds_ATLAS_train = roc_curve(y_train, data_train['isATLAS'])#, sample_weight=data_train["revWeight_nEst100"])
+fpr_ATLAS_train, tpr_ATLAS_train, thresholds_ATLAS_train = roc_curve(y_train, data_train['isATLAS'], sample_weight=data_train["regWeight_nEst30"])
 auc_ATLAS_train = auc(fpr_ATLAS_train, tpr_ATLAS_train)
 
-fpr_ATLAS_valid, tpr_ATLAS_valid, thresholds_ATLAS_valid = roc_curve(y_valid, data_valid['isATLAS'])#, sample_weight=data_valid["revWeight_nEst100"])
+fpr_ATLAS_valid, tpr_ATLAS_valid, thresholds_ATLAS_valid = roc_curve(y_valid, data_valid['isATLAS'], sample_weight=data_valid["regWeight_nEst30"])
 auc_ATLAS_valid = auc(fpr_ATLAS_valid, tpr_ATLAS_valid)
 
 fprCompare = fpr_ATLAS_valid[1]; tprCompare = tpr_ATLAS_valid[1]
@@ -847,7 +950,7 @@ data_valid_cut = data_valid[(data_valid["invM"] > 80) &  (data_valid["invM"] < 1
 
 print("Now with same background as ATLAS insted of Fpr")
 print("")
-sel_train = getSameBkg(data_train_cut, mask_LGBM, 0.95, decimals=4)
+sel_train = getSameBkg(data_train_cut, mask_LGBM, 0.97, decimals=4)
 # print(f"The false positive rate for the training set is {fpr_train[thresholds_train == sel_train]}")
 # thres_mask = (np.around(thresholds_train,decimals=6) == np.around(tpr_train,decimals=6))
 # print(f"Yielding true positive rate {tpr_train[thres_mask]}")
@@ -885,10 +988,10 @@ sel_valid = getSameBkg(data_valid_cut, mask_LGBM, 0.98, decimals=4)
 # data_valid_cut.loc[GetPIDCut(data_valid_cut, MLpidSel_valid), ['predATLASmlpid']] = 1
 #
 # ## ML instead of ATLAS
-# fpr_MLPID_train, tpr_MLPID_train, thresholds_MLPID_train = roc_curve(y_train, data_train['predATLASmlpid'])#, sample_weight=data_train["regWeight_nEst10"])
+# fpr_MLPID_train, tpr_MLPID_train, thresholds_MLPID_train = roc_curve(y_train, data_train['predATLASmlpid'])#, sample_weight=data_train["regWeight_nEst30"])
 # auc_MLPID_train = auc(fpr_MLPID_train, tpr_MLPID_train)
 #
-# fpr_MLPID_valid, tpr_MLPID_valid, thresholds_MLPID_valid = roc_curve(y_valid, data_valid['predATLASmlpid'])#, sample_weight=data_valid["regWeight_nEst10"])
+# fpr_MLPID_valid, tpr_MLPID_valid, thresholds_MLPID_valid = roc_curve(y_valid, data_valid['predATLASmlpid'])#, sample_weight=data_valid["regWeight_nEst30"])
 # auc_MLPID_valid = auc(fpr_MLPID_valid, tpr_MLPID_valid)
 #
 # print("Create ATLAS prediction masks with ISO")
@@ -914,10 +1017,10 @@ sel_valid = getSameBkg(data_valid_cut, mask_LGBM, 0.98, decimals=4)
 # data_valid_cut.loc[GetPIDISOCut(data_valid_cut, MLisoSel_valid), ['predATLASmlisopid']] = 1
 #
 # ## ML instead of ATLAS
-# fpr_MLPIDISO_train, tpr_MLPIDISO_train, thresholds_MLPIDISO_train = roc_curve(y_train, data_train['predATLASmlisopid'])#, sample_weight=data_train["regWeight_nEst10"])
+# fpr_MLPIDISO_train, tpr_MLPIDISO_train, thresholds_MLPIDISO_train = roc_curve(y_train, data_train['predATLASmlisopid'])#, sample_weight=data_train["regWeight_nEst30"])
 # auc_MLPIDISO_train = auc(fpr_MLPIDISO_train, tpr_MLPIDISO_train)
 #
-# fpr_MLPIDISO_valid, tpr_MLPIDISO_valid, thresholds_MLPIDISO_valid = roc_curve(y_valid, data_valid['predATLASmlisopid'])#, sample_weight=data_valid["regWeight_nEst10"])
+# fpr_MLPIDISO_valid, tpr_MLPIDISO_valid, thresholds_MLPIDISO_valid = roc_curve(y_valid, data_valid['predATLASmlisopid'])#, sample_weight=data_valid["regWeight_nEst30"])
 # auc_MLPIDISO_valid = auc(fpr_MLPIDISO_valid, tpr_MLPIDISO_valid)
 
 ######## Give the Z selection LH values instead of ML PID/ISO
@@ -954,8 +1057,8 @@ ax.plot(tpr_ATLAS_train[1], fpr_ATLAS_train[1], 'r*', label="{:s} (area = {:.3f}
 
 ax.set_ylabel('Background efficiency')
 ax.set_xlabel('Signal efficiency')
-ax.set_xlim([0.7, 1.02])
-ax.set_yscale('log', nonposy='clip')
+ax.set_xlim([0, 1.02])
+# ax.set_yscale('log', nonposy='clip')
 ax.legend(loc='best', prop={'size': 13})
 for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
              ax.get_xticklabels() + ax.get_yticklabels()):
@@ -974,7 +1077,7 @@ fig, ax = plt.subplots(1,1, figsize=(8,5))
 for fpr, tpr, auc, name in zip(fprs, tprs, aucs, names):
     ax.plot(tpr, fpr, label="LGBM {:s} (area = {:.3f})".format(name, auc))
 # ax.plot(tpr_ATLAS_train[1], fpr_ATLAS_train[1], 'r*', label="{:s} (area = {:.3f})".format("ATLAS_train", auc_ATLAS_train))
-ax.plot(tpr_ATLAS_valid[1], fpr_ATLAS_valid[1], 'b*', label="{:s} (area = {:.3f})".format("ATLAS_valid", auc_ATLAS_valid))
+ax.plot(tpr_ATLAS_valid[1], fpr_ATLAS_valid[1], 'r*', label="{:s} (area = {:.3f})".format("ATLAS_valid", auc_ATLAS_valid))
 
 # # ax.plot(tpr_MLPID_train[1], fpr_MLPID_train[1], 'g*', label="{:s} (area = {:.3f})".format("ATLAS + ML PID train", auc_MLPID_train))
 # ax.plot(tpr_MLPID_valid[1], fpr_MLPID_valid[1], 'm*', label="{:s} (area = {:.3f})".format("ATLAS + ML PID valid", auc_MLPID_valid))
@@ -984,8 +1087,8 @@ ax.plot(tpr_ATLAS_valid[1], fpr_ATLAS_valid[1], 'b*', label="{:s} (area = {:.3f}
 
 ax.set_ylabel('Background efficiency')
 ax.set_xlabel('Signal efficiency')
-ax.set_xlim([0.7, 1.02])
-ax.set_yscale('log', nonposy='clip')
+ax.set_xlim([0, 1.02])
+# ax.set_yscale('log', nonposy='clip')
 ax.legend(loc='best', prop={'size': 13})
 for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
              ax.get_xticklabels() + ax.get_yticklabels()):
@@ -999,49 +1102,49 @@ plt.close()
 # Plotting SHAP values
 #============================================================================
 
-# shap_values_train = shap.TreeExplainer(bst).shap_values(X_train)
-#
-# shap_values_df = pd.DataFrame(shap_values_train[0], columns = training_var)
-# shap_val = shap_values_df.abs().mean(0)
-# shap_val_sort = shap_val.sort_values(0, ascending = False)
-#
-# # Get names of values and positions for plot
-# shap_name_sort = list(shap_val_sort.index.values)
-# shap_pos = np.arange(len(shap_name_sort))
-#
-# # Plot shap values
-# print('Plotting SHAP values for training set...')
-# fig_shap, ax_shap = plt.subplots(figsize=(6,3))
-# ax_shap.barh(shap_pos, shap_val_sort, align='center')
-# ax_shap.set_yticks(shap_pos)
-# ax_shap.set_yticklabels(shap_name_sort)
-# ax_shap.invert_yaxis()  # labels read top-to-bottom
-# ax_shap.set_xlabel('mean(|SHAP|)')
-# #ax_shap.set_title('SHAP values - Average impact on model output')
-# plt.tight_layout()
-# fig_shap.savefig(args.outdir + 'featureImportance_SHAP_train' + '.pdf')
-#
-# shap_values_valid = shap.TreeExplainer(bst).shap_values(X_valid)
-#
-# shap_values_df = pd.DataFrame(shap_values_valid[0], columns = training_var)
-# shap_val = shap_values_df.abs().mean(0)
-# shap_val_sort = shap_val.sort_values(0, ascending = False)
-#
-# # Get names of values and positions for plot
-# shap_name_sort = list(shap_val_sort.index.values)
-# shap_pos = np.arange(len(shap_name_sort))
-#
-# # Plot shap values
-# print('Plotting SHAP values for validation set...')
-# fig_shap, ax_shap = plt.subplots(figsize=(6,3))
-# ax_shap.barh(shap_pos, shap_val_sort, align='center')
-# ax_shap.set_yticks(shap_pos)
-# ax_shap.set_yticklabels(shap_name_sort)
-# ax_shap.invert_yaxis()  # labels read top-to-bottom
-# ax_shap.set_xlabel('mean(|SHAP|)')
-# #ax_shap.set_title('SHAP values - Average impact on model output')
-# plt.tight_layout()
-# fig_shap.savefig(args.outdir + 'featureImportance_SHAP_valid' + '.pdf')
+shap_values_train = shap.TreeExplainer(bst).shap_values(X_train)
+
+shap_values_df = pd.DataFrame(shap_values_train[0], columns = training_var)
+shap_val = shap_values_df.abs().mean(0)
+shap_val_sort = shap_val.sort_values(0, ascending = False)
+
+# Get names of values and positions for plot
+shap_name_sort = list(shap_val_sort.index.values)
+shap_pos = np.arange(len(shap_name_sort))
+
+# Plot shap values
+print('Plotting SHAP values for training set...')
+fig_shap, ax_shap = plt.subplots(figsize=(6,3))
+ax_shap.barh(shap_pos, shap_val_sort, align='center')
+ax_shap.set_yticks(shap_pos)
+ax_shap.set_yticklabels(shap_name_sort)
+ax_shap.invert_yaxis()  # labels read top-to-bottom
+ax_shap.set_xlabel('mean(|SHAP|)')
+#ax_shap.set_title('SHAP values - Average impact on model output')
+plt.tight_layout()
+fig_shap.savefig(args.outdir + 'featureImportance_SHAP_train' + '.pdf')
+
+shap_values_valid = shap.TreeExplainer(bst).shap_values(X_valid)
+
+shap_values_df = pd.DataFrame(shap_values_valid[0], columns = training_var)
+shap_val = shap_values_df.abs().mean(0)
+shap_val_sort = shap_val.sort_values(0, ascending = False)
+
+# Get names of values and positions for plot
+shap_name_sort = list(shap_val_sort.index.values)
+shap_pos = np.arange(len(shap_name_sort))
+
+# Plot shap values
+print('Plotting SHAP values for validation set...')
+fig_shap, ax_shap = plt.subplots(figsize=(6,3))
+ax_shap.barh(shap_pos, shap_val_sort, align='center')
+ax_shap.set_yticks(shap_pos)
+ax_shap.set_yticklabels(shap_name_sort)
+ax_shap.invert_yaxis()  # labels read top-to-bottom
+ax_shap.set_xlabel('mean(|SHAP|)')
+#ax_shap.set_title('SHAP values - Average impact on model output')
+plt.tight_layout()
+fig_shap.savefig(args.outdir + 'featureImportance_SHAP_valid' + '.pdf')
 
 
 #============================================================================
@@ -1071,13 +1174,13 @@ ATLASData = data_train.loc[(data_train["isATLAS"] == 1) & (data_train["label"] =
 # PIDData = data_train.loc[(data_train["predATLASmlpid"] == 1) & (data_train["label"] == 1)]["invM"]
 # ISOData = data_train.loc[(data_train["predATLASmlisopid"] == 1) & (data_train["label"] == 1)]["invM"]
 
-ax.hist(sigData, bins=120, range=(50,100),  histtype='step', color = 'k', label = "True")
-ax.hist(sigDataATLAS, bins=120, range=(50,100), histtype='step', color = 'r', linestyle = 'dashed', label = "LGBM (ATLAS fpr cut)")
-ax.hist(sigDataATLAS2, bins=120, range=(50,100), histtype='step', color = 'c', linestyle = 'dashed', label = "LGBM (ATLAS bkg cut)")
-ax.hist(sigDataLH, bins=120, range=(50,100), histtype='step', color = 'tab:purple', label = "LGBM LH model")
-ax.hist(ATLASData, bins=120, range=(50,100),  histtype='step', color = 'b', label = "ATLAS")
-ax.hist(PIDData, bins=120, range=(50,100),  histtype='step', color = 'g', label = "ATLAS + ML PID")
-ax.hist(ISOData, bins=120, range=(50,100),  histtype='step', color = 'm', label = "ATLAS + ML PID + ML ISO")
+ax.hist(sigData, bins=120, range=(50,200),  histtype='step', color = 'k', label = "True")
+ax.hist(sigDataATLAS, bins=120, range=(50,200), histtype='step', color = 'r', linestyle = 'dashed', label = "LGBM (ATLAS fpr cut)")
+ax.hist(sigDataATLAS2, bins=120, range=(50,200), histtype='step', color = 'c', linestyle = 'dashed', label = "LGBM (ATLAS bkg cut)")
+# ax.hist(sigDataLH, bins=120, range=(50,200), histtype='step', color = 'tab:purple', label = "LGBM LH model")
+ax.hist(ATLASData, bins=120, range=(50,200),  histtype='step', color = 'b', label = "ATLAS")
+# ax.hist(PIDData, bins=120, range=(50,200),  histtype='step', color = 'g', label = "ATLAS + ML PID")
+# ax.hist(ISOData, bins=120, range=(50,200),  histtype='step', color = 'm', label = "ATLAS + ML PID + ML ISO")
 
 ax.set_xlabel("invM [GeV]")
 ax.set_ylabel("Frequency")
@@ -1110,12 +1213,12 @@ ATLASData = data_valid.loc[(data_valid["isATLAS"] == 1) & (data_valid["label"] =
 # ISOData = data_valid.loc[(data_valid["predATLASmlisopid"] == 1) & (data_valid["label"] == 1)]["invM"]
 
 
-ax.hist(sigData, bins=120, range=(60,120),  histtype='step', color = 'k', label = "True")
-# ax.hist(sigDataATLAS, bins=120, range=(60,120), histtype='step', color = 'r', label = "LGBM (ATLAS fpr cut)")
-ax.hist(sigDataATLAS2, bins=120, range=(60,120), histtype='step', color = 'c', label = "LGBM (ATLAS bkg cut)")
-ax.hist(ATLASData, bins=120, range=(60,120),  histtype='step', color = 'b', label = "ATLAS")
-# ax.hist(PIDData, bins=120, range=(60,120),  histtype='step', color = 'g', label = "ATLAS + ML PID")
-# ax.hist(ISOData, bins=120, range=(60,120),  histtype='step', color = 'm', label = "ATLAS + ML PID + ML ISO")
+ax.hist(sigData, bins=120, range=(50,200),  histtype='step', color = 'k', label = "True")
+# ax.hist(sigDataATLAS, bins=120, range=(50,200), histtype='step', color = 'r', label = "LGBM (ATLAS fpr cut)")
+ax.hist(sigDataATLAS2, bins=120, range=(50,200), histtype='step', color = 'c', label = "LGBM (ATLAS bkg cut)")
+ax.hist(ATLASData, bins=120, range=(50,200),  histtype='step', color = 'b', label = "ATLAS")
+# ax.hist(PIDData, bins=120, range=(50,200),  histtype='step', color = 'g', label = "ATLAS + ML PID")
+# ax.hist(ISOData, bins=120, range=(50,200),  histtype='step', color = 'm', label = "ATLAS + ML PID + ML ISO")
 
 ax.set_xlabel("invM [GeV]")
 ax.set_ylabel("Frequency")
@@ -1138,16 +1241,16 @@ data_valid.to_pickle(args.outdir + "valid_data.pkl", protocol=0)
 # print("")
 #
 # #train
-# sigDataTrue = data_train_cut.loc[(data_train_cut["label"] == 1)]
+sigDataTrue = data_train_cut.loc[(data_train_cut["label"] == 1)]
 #
-# # sigDataATLAS = data_train_cut.loc[(data_train_cut["selLGBM"] == 1) & (data_train_cut["label"] == 1)]
-# # bkgDataATLAS = data_train_cut.loc[((data_train_cut["selLGBM"] == 1) & ~(data_train_cut["label"] == 1))]
+# sigDataATLAS = data_train_cut.loc[(data_train_cut["selLGBM"] == 1) & (data_train_cut["label"] == 1)]
+# bkgDataATLAS = data_train_cut.loc[((data_train_cut["selLGBM"] == 1) & ~(data_train_cut["label"] == 1))]
 #
-# sigDataATLAS2 = data_train_cut.loc[(data_train_cut["selLGBM2"] == 1) & (data_train_cut["label"] == 1)]
-# bkgDataATLAS2 = data_train_cut.loc[((data_train_cut["selLGBM2"] == 1) & ~(data_train_cut["label"] == 1))]
+sigDataATLAS2 = data_train_cut.loc[(data_train_cut["selLGBM2"] == 1) & (data_train_cut["label"] == 1)]
+bkgDataATLAS2 = data_train_cut.loc[((data_train_cut["selLGBM2"] == 1) & ~(data_train_cut["label"] == 1))]
 #
-# ATLASData = data_train_cut.loc[(data_train_cut["isATLAS"] == 1) & (data_train_cut["label"] == 1)]
-# bkgATLASData = data_train_cut.loc[((data_train_cut["isATLAS"] == 1) & ~(data_train_cut["label"] == 1))]
+ATLASData = data_train_cut.loc[(data_train_cut["isATLAS"] == 1) & (data_train_cut["label"] == 1)]
+bkgATLASData = data_train_cut.loc[((data_train_cut["isATLAS"] == 1) & ~(data_train_cut["label"] == 1))]
 #
 # # PIDData = data_train_cut.loc[(data_train_cut["predATLASmlpid"] == 1) & (data_train_cut["label"] == 1)]
 # # bkgPIDData = data_train_cut.loc[((data_train_cut["predATLASmlpid"] == 1) & ~(data_train_cut["label"] == 1))]
@@ -1157,22 +1260,23 @@ data_valid.to_pickle(args.outdir + "valid_data.pkl", protocol=0)
 #
 #
 #
-# fig, ax = plt.subplots(figsize=(10,5))
+fig, ax = plt.subplots(figsize=(10,5))
 #
-# x = np.arange(6) #How many different do we have?
+x = np.arange(3) #How many different do we have?
 # # x = np.arange(3)
 # signals =  [ATLASData, PIDData, ISOData, sigDataATLAS2, sigDataLH, sigDataTrue] #sigDataATLAS
+signals =  [ATLASData, sigDataATLAS2, sigDataTrue] #sigDataATLAS
 #
 # bkgs = [len(bkgATLASData), len(bkgPIDData), len(bkgISOData),  len(bkgDataATLAS2), len(bkgDataLH), 0] #len(bkgDataATLAS),
 # # signals = [len(ATLASData), len(sigDataATLAS),  len(sigDataTrue)]
-# # bkgs = [len(bkgATLASData), len(bkgDataATLAS),  0]
+bkgs = [len(bkgATLASData), len(bkgDataATLAS2),  0]
 #
-# n_groups = len(x)
-# index = np.arange(n_groups)
+n_groups = len(x)
+index = np.arange(n_groups)
+
+bar_width = 0.4
 #
-# bar_width = 0.4
-#
-# plt.xticks(x)
+plt.xticks(x)
 # # author_type = np.unique(sigDataTrue['muo1_author'], return_counts = False)
 # # n_all = np.zeros(shape=(len(author_type),len(index)))
 # #
@@ -1197,32 +1301,33 @@ data_valid.to_pickle(args.outdir + "valid_data.pkl", protocol=0)
 # #         ax.text(x = index[i] + bar_width/2, y = v-5, s = f"n = {int(v)} ", color = 'black', ha = 'right', va = 'bottom',size = 5)
 #
 # signals = [len(ATLASData), len(PIDData), len(ISOData),  len(sigDataATLAS2), len(sigDataLH), len(sigDataTrue)] #len(sigDataATLAS),
-# sigs = plt.bar(index - bar_width/2, signals, bar_width, color = 'r', label = 'Signal')
-# for i, v in enumerate(signals):
-#     if i != 0:
-#         ax.text(x = index[i] - bar_width/2, y = v + 0.5, s = f"{str(v)} (+ {np.round((v-signals[0])/signals[0] * 100, 2)} %)", color='black', ha = 'center', va = 'bottom', size = 9)
-#     else:
-#         ax.text(x = index[i] - bar_width/2, y = v + 0.5, s = f"{str(v)}", color='black', ha = 'center', va = 'bottom', size = 9)
-# bkg = plt.bar(index + bar_width/2, bkgs, bar_width, color = 'b', label = 'Background')
+signals = [len(ATLASData), len(sigDataATLAS2), len(sigDataTrue)] #len(sigDataATLAS),
+sigs = plt.bar(index - bar_width/2, signals, bar_width, color = 'r', label = 'Signal')
+for i, v in enumerate(signals):
+    if i != 0:
+        ax.text(x = index[i] - bar_width/2, y = v + 0.5, s = f"{str(v)} (+ {np.round((v-signals[0])/signals[0] * 100, 2)} %)", color='black', ha = 'center', va = 'bottom', size = 9)
+    else:
+        ax.text(x = index[i] - bar_width/2, y = v + 0.5, s = f"{str(v)}", color='black', ha = 'center', va = 'bottom', size = 9)
+bkg = plt.bar(index + bar_width/2, bkgs, bar_width, color = 'b', label = 'Background')
+
+for i, v in enumerate(bkgs):
+    ax.text(x = index[i] + bar_width/2, y = v + 0.5, s = str(v), color = 'black', ha = 'center', va = 'bottom',size = 9)
+#plt.yscale('log')
+plt.ylabel('Count')
+plt.legend()
 #
-# for i, v in enumerate(bkgs):
-#     ax.text(x = index[i] + bar_width/2, y = v + 0.5, s = str(v), color = 'black', ha = 'center', va = 'bottom',size = 9)
-# #plt.yscale('log')
-# plt.ylabel('Count')
-# plt.legend()
-#
-# labels = [item.get_text() for item in ax.get_xticklabels()]
-# labels[0] = 'Cut ATLAS'
+labels = [item.get_text() for item in ax.get_xticklabels()]
+labels[0] = 'Cut ATLAS'
 # labels[1] = f'ATLAS\n + ML PID'
 # labels[2] = f'ATLAS\n + ML PID\n + ML ISO'
 # # labels[3] = f'ML Zmm\n fpr cut: {np.round(sigSeltrain,4)}'
-# labels[3] = f'ML Zmm\n bkg cut: {np.round(sel_train,4)}'
+labels[1] = f'ML Zmm\n bkg cut: {np.round(sel_train,4)}'
 # labels[4] = f'ML Zmm w. LH \n bkg cut: {np.round(sel_trainLH,4)}'
-# labels[5] = 'Zmm truth'
-# ax.set_xticklabels(labels)
+labels[2] = 'Zmm truth'
+ax.set_xticklabels(labels)
 #
-# plt.tight_layout()
-# fig.savefig(args.outdir + "barplot_train" + ".pdf")
+plt.tight_layout()
+fig.savefig(args.outdir + "barplot_train" + ".pdf")
 #
 # print("The authors of the muons are (training set):")
 #
@@ -1245,19 +1350,19 @@ data_valid.to_pickle(args.outdir + "valid_data.pkl", protocol=0)
 #
 #
 # ####### valid
-# sigDataTrue = data_valid_cut.loc[(data_valid_cut["label"] == 1)]
+sigDataTrue = data_valid_cut.loc[(data_valid_cut["label"] == 1)]
 #
 # # sigDataATLAS = data_valid_cut.loc[(data_valid_cut["selLGBM"] == 1) & (data_valid_cut["label"] == 1)]
 # # bkgDataATLAS = data_valid_cut.loc[((data_valid_cut["selLGBM"] == 1) & ~(data_valid_cut["label"] == 1))]
 #
-# sigDataATLAS2 = data_valid_cut.loc[(data_valid_cut["selLGBM2"] == 1) & (data_valid_cut["label"] == 1)]
-# bkgDataATLAS2 = data_valid_cut.loc[((data_valid_cut["selLGBM2"] == 1) & ~(data_valid_cut["label"] == 1))]
-#
+sigDataATLAS2 = data_valid_cut.loc[(data_valid_cut["selLGBM2"] == 1) & (data_valid_cut["label"] == 1)]
+bkgDataATLAS2 = data_valid_cut.loc[((data_valid_cut["selLGBM2"] == 1) & ~(data_valid_cut["label"] == 1))]
+
 # sigDataLH = data_valid_cut.loc[(data_valid_cut["selLGBM_LH"] == 1) & (data_valid_cut["label"] == 1)]
 # bkgDataLH = data_valid_cut.loc[(data_valid_cut["selLGBM_LH"] == 1) & ~(data_valid_cut["label"] == 1)]
 #
-# ATLASData = data_valid_cut.loc[(data_valid_cut["isATLAS"] == 1) & (data_valid_cut["label"] == 1)]
-# bkgATLASData = data_valid_cut.loc[((data_valid_cut["isATLAS"] == 1) & ~(data_valid_cut["label"] == 1))]
+ATLASData = data_valid_cut.loc[(data_valid_cut["isATLAS"] == 1) & (data_valid_cut["label"] == 1)]
+bkgATLASData = data_valid_cut.loc[((data_valid_cut["isATLAS"] == 1) & ~(data_valid_cut["label"] == 1))]
 #
 # PIDData = data_valid_cut.loc[(data_valid_cut["predATLASmlpid"] == 1) & (data_valid_cut["label"] == 1)]
 # bkgPIDData = data_valid_cut.loc[((data_valid_cut["predATLASmlpid"] == 1) & ~(data_valid_cut["label"] == 1))]
@@ -1265,22 +1370,23 @@ data_valid.to_pickle(args.outdir + "valid_data.pkl", protocol=0)
 # ISOData = data_valid_cut.loc[(data_valid_cut["predATLASmlisopid"] == 1) & (data_valid_cut["label"] == 1)]
 # bkgISOData = data_valid_cut.loc[((data_valid_cut["predATLASmlisopid"] == 1) & ~(data_valid_cut["label"] == 1))]
 #
-# fig, ax = plt.subplots(figsize=(10,5))
+fig, ax = plt.subplots(figsize=(10,5))
 #
-# x = np.arange(6) #How many different do we have?
+x = np.arange(3) #How many different do we have?
 # # x = np.arange(3)
 #
 # signals = [ATLASData, PIDData, ISOData, sigDataATLAS2,  sigDataLH, sigDataTrue] #sigDataATLAS
+signals = [ATLASData, sigDataATLAS2, sigDataTrue] #sigDataATLAS
 # bkgs = [len(bkgATLASData), len(bkgPIDData), len(bkgISOData),  len(bkgDataATLAS2), len(bkgDataLH), 0] #len(bkgDataATLAS),
-# # signals = [len(ATLASData), len(sigDataATLAS),  len(sigDataTrue)]
-# # bkgs = [len(bkgATLASData), len(bkgDataATLAS),  0]
+# signals = [len(ATLASData), len(sigDataATLAS2),  len(sigDataTrue)]
+bkgs = [len(bkgATLASData), len(bkgDataATLAS2),  0]
 #
-# n_groups = len(x)
-# index = np.arange(n_groups)
-#
-# bar_width = 0.4
-#
-# plt.xticks(x)
+n_groups = len(x)
+index = np.arange(n_groups)
+
+bar_width = 0.4
+
+plt.xticks(x)
 # #
 # # author_type = np.unique(sigDataTrue['muo1_author'], return_counts = False)
 # # n_all = np.zeros(shape=(len(author_type),len(index)))
@@ -1308,36 +1414,36 @@ data_valid.to_pickle(args.outdir + "valid_data.pkl", protocol=0)
 #
 #
 #
-#
+signals = [len(ATLASData), len(sigDataATLAS2),  len(sigDataTrue)]
 # signals = [len(ATLASData), len(PIDData), len(ISOData),  len(sigDataATLAS2),  len(sigDataLH), len(sigDataTrue)] #len(sigDataATLAS),
-# sigs = plt.bar(index - bar_width/2, signals, bar_width, color = 'r', label = 'Signal')
+sigs = plt.bar(index - bar_width/2, signals, bar_width, color = 'r', label = 'Signal')
+
+for i, v in enumerate(signals):
+    if i != 0:
+        ax.text(x = index[i] - bar_width/2, y = v + 0.5, s = f"{str(v)} (+ {np.round((v-signals[0])/signals[0] * 100, 2)} %)", color='black', ha = 'center', va = 'bottom', size = 9)
+    else:
+        ax.text(x = index[i] - bar_width/2, y = v + 0.5, s = f"{str(v)}", color='black', ha = 'center', va = 'bottom', size = 9)
+
+bkg = plt.bar(index + bar_width/2, bkgs, bar_width, color = 'b', label = 'Background')
+
+for i, v in enumerate(bkgs):
+   ax.text(x = index[i] + bar_width/2, y = v + 0.5, s = str(v), color = 'black', ha = 'center', va = 'bottom', size = 9)
+
+plt.ylabel('Count')
+plt.legend()
 #
-# for i, v in enumerate(signals):
-#     if i != 0:
-#         ax.text(x = index[i] - bar_width/2, y = v + 0.5, s = f"{str(v)} (+ {np.round((v-signals[0])/signals[0] * 100, 2)} %)", color='black', ha = 'center', va = 'bottom', size = 9)
-#     else:
-#         ax.text(x = index[i] - bar_width/2, y = v + 0.5, s = f"{str(v)}", color='black', ha = 'center', va = 'bottom', size = 9)
-#
-# bkg = plt.bar(index + bar_width/2, bkgs, bar_width, color = 'b', label = 'Background')
-#
-# for i, v in enumerate(bkgs):
-#    ax.text(x = index[i] + bar_width/2, y = v + 0.5, s = str(v), color = 'black', ha = 'center', va = 'bottom', size = 9)
-#
-# plt.ylabel('Count')
-# plt.legend()
-#
-# labels = [item.get_text() for item in ax.get_xticklabels()]
-# labels[0] = 'Cut ATLAS'
+labels = [item.get_text() for item in ax.get_xticklabels()]
+labels[0] = 'Cut ATLAS'
 # labels[1] = f'ATLAS\n + ML PID'
 # labels[2] = f'ATLAS\n + ML PID\n + ML ISO'
 # # labels[3] = f'ML Zmm\n fpr cut: {np.round(sigSelvalid,4)}'
-# labels[3] = f'ML Zmm\n bkg cut: {np.round(sel_valid,4)}'
+labels[1] = f'ML Zmm\n bkg cut: {np.round(sel_valid,4)}'
 # labels[4] = f'ML Zmm w. LH \n bkg cut: {np.round(sel_validLH,4)}'
-# labels[5] = 'Zmm truth'
-# ax.set_xticklabels(labels)
-#
-# plt.tight_layout()
-# fig.savefig(args.outdir + "barplot_valid" + ".pdf")
+labels[2] = 'Zmm truth'
+ax.set_xticklabels(labels)
+
+plt.tight_layout()
+fig.savefig(args.outdir + "barplot_valid" + ".pdf")
 #
 # #### PLot bar plot for not cutted data
 #

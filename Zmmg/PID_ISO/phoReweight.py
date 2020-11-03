@@ -43,7 +43,7 @@ t_start = time()
 
 # Command line options
 parser = argparse.ArgumentParser(description="Combine datafiles, reweigh data and add columns.")
-parser.add_argument('--outdir', action='store', default="output/phoReweightFiles/", type=str,
+parser.add_argument('--outdir', action='store', default="output/phoReweightFilesForPIDISO/", type=str,
                     help='Output directory.')
 parser.add_argument('paths', type=str, nargs='+',
                     help='HDF5 file(s) to reweight.')

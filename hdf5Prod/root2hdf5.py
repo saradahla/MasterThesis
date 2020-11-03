@@ -15,6 +15,12 @@
     nohup python -u root2hdf5.py --tag Zmm151020 --tree analysis --datatype MC ../../storage/dataAnalysis/151020/mc16_13TeV.361107.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Zmumu.deriv.DAOD_MUON1.e3601_s3126_r10724_p3629.root 2>&1 &> output/logZmmToHdf5_151020.txt & disown
     nohup python -u root2hdf5.py --tag Wmn151020 --tree analysis --datatype MC ../../storage/dataAnalysis/151020/mc16_13TeV.361101.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Wplusmunu.deriv.DAOD_MUON1.e3601_e5984_s3126_r10724_r10726_p3629.root 2>&1 &> output/logWmnToHdf5_151020.txt & disown
     nohup python -u root2hdf5.py --tag Zmmgam20201022 --tree analysis --datatype MC ../../storage/dataAnalysis/mc16_13TeV.301536.Sherpa_CT10_mumugammaPt10_35.deriv.DAOD_EGAM4.e3952_s3126_r10201_r10210_p3956.root 2>&1 &> output/logZmmgToHdf5_221020.txt & disown
+    nohup python -u root2hdf5.py --tag Zmmgam20201030_data --tree analysis --datatype Data ../../../storage/dataAnalysis/data18_13TeV.periodAllYear.physics_Main.PhysCont.DAOD_EGAM4.grp18_v01_p3948.root 2>&1 &> output/logZmmgToHdf5_20201029.txt & disown
+nohup python -u root2hdf5.py --tag Zmmgam20201029_benData --tree analysis --datatype Data ../../../storage/dataAnalysis/user.lehrke.mc16_13TeV.301536.mumugammaPt10_35.e3952_s3126_r10201_r10210.EGAM1.002.ePID19_EXT0.root 2>&1 &> output/logZmmgToHdf5_benData.txt & disown
+nohup python -u root2hdf5.py --tag Zmmgam20201029_MC --tree analysis --datatype MC ../../../storage/dataAnalysis/mc16_13TeV.301536.Sherpa_CT10_mumugammaPt10_35.deriv.DAOD_EGAM4.e3952_s3126_r10201_r10210_p3956.root 2>&1 &> output/logZmmgToHdf5_20201029.txt & disown
+nohup python -u root2hdf5.py --tag HZgam20201029 --tree analysis --datatype MC ../../../storage/dataAnalysis/mc16_13TeV.344303.PowhegPythia8EvtGen_CT10_AZNLOCTEQ6L1_MPIOFF_ggH125_Zllgam.deriv.DAOD_HIGG1D2.e5145_s3126_r10201_p4062.root 2>&1 &> output/logHZgToHdf5_20201029.txt & disown
+nohup python -u root2hdf5.py --tag mumuEGAM4_20201103 --tree analysis --datatype MC ../../../storage/dataAnalysis/DAOD_EGAM4.mc16_13TeV.361107.Zmumu.DAOD_EGAM4.e3601_e5984_s3126_r10724_r10726.root 2>&1 &> output/logZmmEGAM4.txt & disown
+
 
 '''
 
@@ -40,7 +46,7 @@ from time import time
 from datetime import timedelta
 
 from utils import mkdir
-from variableLists import remove_branches, remove_branchesData, remove_branches_pho
+from variableLists import remove_branches, remove_branchesData, remove_branches_pho, remove_branches_phoData
 
 # Logging style and levelo
 log.basicConfig(format='[%(levelname)s] %(message)s', level=log.INFO)

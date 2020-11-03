@@ -386,7 +386,7 @@ log.info(f"Shape valid:      sig: {shapeValidSig}, bkg: {shapeValidBkg}")
 
 truth_var = "label"
 training_var = [
-'correctedScaledAverageMu',
+'correctedScaledActualMu',
 'NvtxReco',
 # "invM" ,
 # "pt" ,
@@ -724,7 +724,7 @@ training_var = [
 ]
 
 training_varLH = [
-'correctedScaledAverageMu',
+'correctedScaledActualMu',
 'NvtxReco',
 # "invM" ,
 # "pt" ,

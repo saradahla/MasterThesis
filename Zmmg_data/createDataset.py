@@ -5,15 +5,8 @@ print("Program running...")
 nohup python -u Zmmg_dataset.py --tag 20201028 ../hdf5Prod/output/root2hdf5/Zmmgam20201022/Zmmgam20201022_0004.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201022/Zmmgam20201022_0005.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201022/Zmmgam20201022_0006.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201022/Zmmgam20201022_0007.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201022/Zmmgam20201022_0008.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201022/Zmmgam20201022_0009.h5 2>&1 &> output/logZmmgDataset.txt & disown
 
     nohup python -u Zmmg_dataset.py --tag Zmmgam20201027_PdgID_Tight  ../hdf5Prod/output/root2hdf5/Zmmgam20201022/Zmmgam20201022_0000.h5   2>&1 &> output/logZmmgDataset.txt & disown
-nohup python -u Zmmg_dataset.py --tag Zmmgam20201029_noTruth  ../hdf5Prod/output/root2hdf5/Zmmgam20201029_MC/Zmmgam20201029_MC_0000.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201029_MC/Zmmgam20201029_MC_0001.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201029_MC/Zmmgam20201029_MC_0002.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201029_MC/Zmmgam20201029_MC_0003.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201029_MC/Zmmgam20201029_MC_0004.h5   2>&1 &> output/logZmmgDataset.txt & disown
+nohup python -u createDataset.py --tag 20201029  ../hdf5Prod/output/root2hdf5/Zmmgam20201029_data/Zmmgam20201029_data_0000.h5   2>&1 &> output/logZmmgDataset.txt & disown
 
-nohup python -u Zmmg_dataset.py --tag Zmmgam20201103  ../hdf5Prod/output/root2hdf5/Zmmgam20201029_MC/Zmmgam20201029_MC_0000.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201029_MC/Zmmgam20201029_MC_0001.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201029_MC/Zmmgam20201029_MC_0002.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201029_MC/Zmmgam20201029_MC_0003.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201029_MC/Zmmgam20201029_MC_0004.h5   2>&1 &> output/logZmmgDataset.txt & disown
-nohup python -u Zmmg_dataset.py --tag HZgam20201029  ../hdf5Prod/output/root2hdf5/HZgam20201029/HZgam20201029_0000.h5 ../hdf5Prod/output/root2hdf5/HZgam20201029/HZgam20201029_0001.h5 ../hdf5Prod/output/root2hdf5/HZgam20201029/HZgam20201029_0002.h5 ../hdf5Prod/output/root2hdf5/HZgam20201029/HZgam20201029_0003.h5 ../hdf5Prod/output/root2hdf5/HZgam20201029/HZgam20201029_0004.h5   2>&1 &> output/logZmmgDataset.txt & disown
-nohup python -u Zmmg_dataset.py --tag HZgam20201029  ../hdf5Prod/output/root2hdf5/HZgam20201029/HZgam20201029_0000.h5  2>&1 &> output/logHZgDataset.txt & disown
-nohup python -u Zmmg_dataset.py --tag Zmmgam20201030_DataTest --data 1 ../hdf5Prod/output/root2hdf5/Zmmgam20201030_data/Zmmgam20201030_data_0000.h5  2>&1 &> output/logZgDataset_data.txt & disown
-nohup python -u Zmmg_dataset.py --tag Zmmgam20201030_Data --data 1 ../hdf5Prod/output/root2hdf5/Zmmgam20201030_data/Zmmgam20201030_data_0000.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201030_data/Zmmgam20201030_data_0001.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201030_data/Zmmgam20201030_data_0002.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201030_data/Zmmgam20201030_data_0003.h5 ../hdf5Prod/output/root2hdf5/Zmmgam20201030_data/Zmmgam20201030_data_0004.h5  2>&1 &> output/logHZgDataset.txt & disown
-nohup python -u Zmmg_dataset.py --tag Zmmgam20201030_Data2 --data 1 ../hdf5Prod/output/root2hdf5/Zmmgam20201030_data/Zmmgam20201030_data_0000.h5 2>&1 &> output/logHZgDataset.txt & disown
-nohup python -u Zmmg_dataset.py --tag ZmmEGAM420201103_2 --data 0 --signal 0 ../hdf5Prod/output/root2hdf5/mumuEGAM4_20201103/mumuEGAM4_20201103_0000.h5 ../hdf5Prod/output/root2hdf5/mumuEGAM4_20201103/mumuEGAM4_20201103_0001.h5 ../hdf5Prod/output/root2hdf5/mumuEGAM4_20201103/mumuEGAM4_20201103_0002.h5 ../hdf5Prod/output/root2hdf5/mumuEGAM4_20201103/mumuEGAM4_20201103_0003.h5 ../hdf5Prod/output/root2hdf5/mumuEGAM4_20201103/mumuEGAM4_20201103_0004.h5 ../hdf5Prod/output/root2hdf5/mumuEGAM4_20201103/mumuEGAM4_20201103_0005.h5 ../hdf5Prod/output/root2hdf5/mumuEGAM4_20201103/mumuEGAM4_20201103_0006.h5 ../hdf5Prod/output/root2hdf5/mumuEGAM4_20201103/mumuEGAM4_20201103_0007.h5 ../hdf5Prod/output/root2hdf5/mumuEGAM4_20201103/mumuEGAM4_20201103_0008.h5 ../hdf5Prod/output/root2hdf5/mumuEGAM4_20201103/mumuEGAM4_20201103_0009.h5 2>&1 &> output/logEGAM4Dataset.txt & disown
 '''
 
 import warnings
@@ -52,10 +45,6 @@ parser.add_argument('paths', type=str, nargs='+',
                     help='ROOT file(s) to be converted.')
 parser.add_argument('--max-processes', action='store', default=10, type=int,
                     help='Maximum number of concurrent processes to use.')
-parser.add_argument('--data', action='store', default=0, type=int,
-                    help='Do we have a truth?')
-parser.add_argument('--signal', action='store', default=1, type=int,
-                    help='Is it signal or background?')
 
 args = parser.parse_args()
 
@@ -72,10 +61,6 @@ if args.max_processes > 20:
 # Will stop if the output already exists since re-running is either not needed or unwanted
 # If it's wanted, delete the output first yourself
 
-if args.signal == 1:
-    log.info("We are working with a signal file")
-elif args.signal == 0:
-    log.info("We are working with a background file")
 
 args.outdir = args.outdir+f"{args.tag}/"
 if os.path.exists(args.outdir):
@@ -109,16 +94,15 @@ def signalSelection(hf, event, invM, pProbe, histNtype, i, process):
         1 = signal
     """
     # Origin of photon is correct
-    origPho = (hf['pho_truthOrigin'][event][pProbe] == 3)
-    origHiggs = (hf['pho_truthOrigin'][event][pProbe] == 14)
-    typeIsoPho = (hf['pho_truthType'][event][pProbe] == 14)
+    # origPho = (hf['pho_truthOrigin'][event][pProbe] == 3)
+    # typeIsoPho = (hf['pho_truthType'][event][pProbe] == 14)
     # print(hf['pho_truthOrigin'][event][pProbe])
     # PdgId of photon is correct
-    pdgId22 = (np.abs(hf['pho_truthPdgId_atlas'][event][pProbe]) == 22)
+    # pdgId22 = (np.abs(hf['pho_truthPdgId_atlas'][event][pProbe]) == 22)
     Tight = (hf['pho_isPhotonEMTight'][event][pProbe])
 
     # Return type
-    if origPho * pdgId22: #(typeIsoPho):
+    if (Tight):
     # if ((invM/1000 > 80) and (invM/1000 < 100)):
         histNtype[0,0] += 1
         return 1 # Signal
@@ -127,11 +111,10 @@ def signalSelection(hf, event, invM, pProbe, histNtype, i, process):
     #     return 2 # Trash
     else:
         histNtype[0,1] += 1
-        return 2 # Bkg
+        return 0 # Bkg
     #
 
-
-def combinedVariables(hf, event, muoTag, muoProbe, phoProbe, onlyZmm=False):
+def combinedVariables(hf, event, muoTag, muoProbe, phoProbe):
     """
     Calculate variables of the electron pair and photon.
 
@@ -156,10 +139,7 @@ def combinedVariables(hf, event, muoTag, muoProbe, phoProbe, onlyZmm=False):
     p2 = hf[f'muo_pt'][event][muoProbe]
     eta2 = hf[f'muo_eta'][event][muoProbe]
     phi2 = hf[f'muo_phi'][event][muoProbe]
-    if args.data == 0:
-        p3 = hf[f'pho_et'][event][phoProbe]*1000
-    elif args.data == 1:
-        p3 = hf[f'pho_et'][event][phoProbe]
+    p3 = hf[f'pho_et'][event][phoProbe]
     eta3 = hf[f'pho_eta'][event][phoProbe]
     phi3 = hf[f'pho_phi'][event][phoProbe]
 
@@ -173,17 +153,13 @@ def combinedVariables(hf, event, muoTag, muoProbe, phoProbe, onlyZmm=False):
     vecFour3.setptetaphim(p3,eta3,phi3,0)
 
     # calculate invariant mass
-    if onlyZmm:
-        vecFour = vecFour1+vecFour2
-    else:
-        vecFour = vecFour1+vecFour2+vecFour3
+    vecFour = vecFour1+vecFour2+vecFour3
     invM = vecFour.mass
     pt = vecFour.pt
     eta = vecFour.eta
     phi = vecFour.phi()
 
     return invM, pt, eta, phi
-
 
 def getTagsAndProbes(hf, event, i, process):
     """
@@ -194,8 +170,8 @@ def getTagsAndProbes(hf, event, i, process):
         event: Event number.
 
     Returns:
-        eTag: Array of tag electrons.
-        eProbe: Array of probe electrons.
+        mTag: Array of tag muons.
+        mProbe: Array of probe muons.
         pProbe: Array of probe photons.
     """
     mTag = []
@@ -204,21 +180,18 @@ def getTagsAndProbes(hf, event, i, process):
 
     # Get ele tags and probes
     for muo in range(len(hf['muo_pt'][event])):
-        if args.data == 1:
-            if (hf[ "muo_trigger" ][ event ][ muo ]) * (hf[ "muo_LHTight" ][ event ][ muo ]) * (hf[ "muo_pt" ][ event ][ muo ] > 26000):
-                mTag.append(muo)
-            else:
-                mProbe.append(muo)
-        elif args.data == 0:
-            origZ = (hf['muo_truthOrigin'][event][muo] == 13)
-            pdgId13 = (np.abs(hf['muo_truthPdgId'][event][muo]) == 13)
-            trigger = hf['muo_trigger'][event][muo]
+        # ptMuo = hf['muo_pt'][event][muo]/1000
+        # origZ = (hf['muo_truthOrigin'][event][muo] == 13)
+        # pdgId13 = (np.abs(hf['muo_truthPdgId'][event][muo]) == 13)
+        # trigger = hf['muo_trigger'][event][muo]
+        # LHTight = hf['muo_LHTight'][event][muo]
 
-            if origZ * pdgId13 * trigger:
-                mTag.append(muo)
-            elif (origZ * pdgId13) == 1:
-                mProbe.append(muo)
-
+        if (hf[ "muo_trigger" ][ event ][ muo ] & hf[ "muo_LHTight" ][ event ][ muo ] & (hf[ "muo_pt" ][ event ][ muo ] > 26000)):
+            # print("triggered")
+            mTag.append(muo)
+        else:
+            mProbe.append(muo)
+    # ptPho = hf['pho_et'][event][muo]
     # Get pho probes
     pProbe = np.arange(0,len(hf['pho_et'][event]),1)
 
@@ -241,14 +214,14 @@ def addMuonVariables(hf, event, data_temp, muoNr, muo):
         Nothing. Data is set in existing array.
 
     """
-    if args.data == 0:
-        data_temp[ 0, column_names.index( f'muo{muoNr}_truthPdgId' ) ] = hf[ 'muo_truthPdgId' ][ event ][ muo ]
-        data_temp[ 0, column_names.index( f'muo{muoNr}_truthType' ) ] = hf[ 'muo_truthType' ][ event ][ muo ]
-        data_temp[ 0, column_names.index( f'muo{muoNr}_truthOrigin' ) ] = hf[ 'muo_truthOrigin' ][ event ][ muo ]
+
+    # data_temp[ 0, column_names.index( f'muo{muoNr}_truthPdgId' ) ] = hf[ 'muo_truthPdgId' ][ event ][ muo ]
+    # data_temp[ 0, column_names.index( f'muo{muoNr}_truthType' ) ] = hf[ 'muo_truthType' ][ event ][ muo ]
+    # data_temp[ 0, column_names.index( f'muo{muoNr}_truthOrigin' ) ] = hf[ 'muo_truthOrigin' ][ event ][ muo ]
 
     data_temp[ 0, column_names.index( f'muo{muoNr}_etcone20' ) ] = hf[ 'muo_etcone20' ][ event ][ muo ]
-    # data_temp[ 0, column_names.index( f'muo{muoNr}_etcone30' ) ] = hf[ 'muo_etcone30' ][ event ][ muo ]
-    # data_temp[ 0, column_names.index( f'muo{muoNr}_etcone40' ) ] = hf[ 'muo_etcone40' ][ event ][ muo ]
+    data_temp[ 0, column_names.index( f'muo{muoNr}_etcone30' ) ] = hf[ 'muo_etcone30' ][ event ][ muo ]
+    data_temp[ 0, column_names.index( f'muo{muoNr}_etcone40' ) ] = hf[ 'muo_etcone40' ][ event ][ muo ]
 
     data_temp[ 0, column_names.index( f'muo{muoNr}_ptcone20' ) ] = hf[ 'muo_ptcone20' ][ event ][ muo ]
     data_temp[ 0, column_names.index( f'muo{muoNr}_ptcone30' ) ] = hf[ 'muo_ptcone30' ][ event ][ muo ]
@@ -350,18 +323,17 @@ def addPhotonVariables(hf, event, data_temp, pho):
     Returns:
         Nothing. Data is set in existing array.
     """
-    if args.data == 0:
-        data_temp[ 0, column_names.index( 'pho_truthPdgId_atlas') ] = hf[ 'pho_truthPdgId_atlas' ][ event][ pho ]
+    # data_temp[ 0, column_names.index( 'pho_truthPdgId_egam') ] = hf[ 'pho_truthPdgId_egam' ][ event][ pho ]
+    # data_temp[ 0, column_names.index( 'pho_truthPdgId_atlas') ] = hf[ 'pho_truthPdgId_atlas' ][ event][ pho ]
     # data_temp[ 0, column_names.index( 'pho_egamTruthParticle') ] = hf[ 'pho_egamTruthParticle' ][ event][ pho ]
-        data_temp[ 0, column_names.index( 'pho_truthType') ] = hf[ 'pho_truthType' ][ event][ pho ]
-        data_temp[ 0, column_names.index( 'pho_truthOrigin') ] = hf[ 'pho_truthOrigin' ][ event][ pho ]
+    # data_temp[ 0, column_names.index( 'pho_truthType') ] = hf[ 'pho_truthType' ][ event][ pho ]
+    # data_temp[ 0, column_names.index( 'pho_truthOrigin') ] = hf[ 'pho_truthOrigin' ][ event][ pho ]
     data_temp[ 0, column_names.index( 'pho_isPhotonEMLoose') ] = hf[ 'pho_isPhotonEMLoose' ][ event][ pho ]
     data_temp[ 0, column_names.index( 'pho_isPhotonEMTight') ] = hf[ 'pho_isPhotonEMTight' ][ event][ pho ]
     data_temp[ 0, column_names.index( 'pho_e') ] = hf[ 'pho_e' ][ event][ pho ]
     data_temp[ 0, column_names.index( 'pho_eta') ] = hf[ 'pho_eta' ][ event][ pho ]
     data_temp[ 0, column_names.index( 'pho_phi') ] = hf[ 'pho_phi' ][ event][ pho ]
     data_temp[ 0, column_names.index( 'pho_et') ] = hf[ 'pho_et' ][ event][ pho ]
-    # data_temp[ 0, column_names.index( 'pho_pt') ] = hf[ 'pho_pt' ][ event][ pho ]
     data_temp[ 0, column_names.index( 'pho_Rhad1') ] = hf[ 'pho_Rhad1' ][ event][ pho ]
     data_temp[ 0, column_names.index( 'pho_Rhad') ] = hf[ 'pho_Rhad' ][ event][ pho ]
     data_temp[ 0, column_names.index( 'pho_weta2') ] = hf[ 'pho_weta2' ][ event][ pho ]
@@ -452,27 +424,21 @@ def multiExtract(arguments):
                             data_temp = np.zeros((1,len(column_names)))
                             # Calculate variables of the electron pair
                             invM, pt, eta, phi = combinedVariables(hf, event, muoTag, muoProbe, phoProbe)
-                            invM_Zmm, _, _, _ = combinedVariables(hf, event, muoTag, muoProbe, phoProbe, onlyZmm = True)
 
                             # Get type
-                            if ((args.data == 0) or (args.signal == 1)):
-                                selection = signalSelection(hf, event, invM, phoProbe, histNtype, i, process)
-                                if selection == 2:
-                                    continue
+                            selection = signalSelection(hf, event, invM, phoProbe, histNtype, i, process)
+                            if selection == 2:
+                                continue
 
                             # Add event variables to array
                             data_temp[ 0, column_names.index( 'NvtxReco' ) ] = np.int(hf['NvtxReco'][event])
                             data_temp[ 0, column_names.index( 'correctedScaledAverageMu' ) ] = hf[ 'correctedScaledAverageMu' ][ event ]
                             data_temp[ 0, column_names.index( 'correctedScaledActualMu' ) ] = hf[ 'correctedScaledActualMu' ][ event ]
                             data_temp[ 0, column_names.index( 'invM' ) ] = invM/1000
-                            data_temp[ 0, column_names.index( 'invM_mm' ) ] = invM_Zmm/1000
                             data_temp[ 0, column_names.index( 'pt' ) ] = pt/1000
                             data_temp[ 0, column_names.index( 'eta' ) ] = eta
                             data_temp[ 0, column_names.index( 'phi' ) ] = phi
-                            if ((args.data == 0) and (args.signal == 1)):
-                                data_temp[ 0, column_names.index( 'type' ) ] = selection
-                            elif ((args.data == 1) or (args.signal == 0)):
-                                data_temp[ 0, column_names.index( 'type' ) ] = 0
+                            data_temp[ 0, column_names.index( 'type' ) ] = selection
 
                             # Add electron variables to array
                             addMuonVariables(hf, event, data_temp, 1, muoTag)
@@ -574,7 +540,6 @@ column_dtype = {'correctedScaledAverageMu': float,
                 'NvtxReco': float,
                 'eventWeight':float,
                 "invM" : float,
-                "invM_mm" : float,
                 "pt" : float,
                 "eta" : float,
                 "phi" : float,
@@ -582,9 +547,9 @@ column_dtype = {'correctedScaledAverageMu': float,
                 "isATLAS" : int,
                 ####
                 ####
-                'muo1_truthPdgId': int,
-                'muo1_truthType': int,
-                'muo1_truthOrigin': int,
+                # 'muo1_truthPdgId': int,
+                # 'muo1_truthType': int,
+                # 'muo1_truthOrigin': int,
                 # 'muo1_truth_eta': float,
                 # 'muo1_truth_phi': float,
                 # 'muo1_truth_m': float,
@@ -593,8 +558,8 @@ column_dtype = {'correctedScaledAverageMu': float,
                 # 'muo1_truth_pz': float,
                 # 'muo1_truth_E': float,
                 'muo1_etcone20': float,
-                # 'muo1_etcone30': float,
-                # 'muo1_etcone40': float,
+                'muo1_etcone30': float,
+                'muo1_etcone40': float,
                 'muo1_ptcone20': float,
                 'muo1_ptcone30': float,
                 'muo1_ptcone40': float,
@@ -743,9 +708,9 @@ column_dtype = {'correctedScaledAverageMu': float,
                 # 'muo1_z0_staco': float,
                 ######
                 ######
-                'muo2_truthPdgId': int,
-                'muo2_truthType': int,
-                'muo2_truthOrigin': int,
+                # 'muo2_truthPdgId': int,
+                # 'muo2_truthType': int,
+                # 'muo2_truthOrigin': int,
                 # 'muo2_truth_eta': float,
                 # 'muo2_truth_phi': float,
                 # 'muo2_truth_m': float,
@@ -905,17 +870,16 @@ column_dtype = {'correctedScaledAverageMu': float,
                 #####
                 #####
                 # "pho_truthPdgId_egam" : int,
-                "pho_truthPdgId_atlas" : int,
+                # "pho_truthPdgId_atlas" : int,
                 # "pho_egamTruthParticle" : int,
-                "pho_truthType" : int,
-                "pho_truthOrigin" : int,
+                # "pho_truthType" : int,
+                # "pho_truthOrigin" : int,
                 "pho_isPhotonEMLoose" : int,
                 "pho_isPhotonEMTight" : int,
                 "pho_e" : float,
                 "pho_eta" : float,
                 "pho_phi" : float,
                 "pho_et" : float,
-                "pho_pt" : float,
                 "pho_Rhad1" : float,
                 "pho_Rhad" : float,
                 "pho_weta2" : float,

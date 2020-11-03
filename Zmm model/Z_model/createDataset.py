@@ -7,7 +7,7 @@ nohup python -u createDataset.py --tag 220920_ZbbW ../../hdf5Prod/output/root2hd
 
 nohup python -u createDataset.py --tag 131020_ZbbW ../../hdf5Prod/output/root2hdf5/Zmm131020/Zmm131020_0004.h5 ../../hdf5Prod/output/root2hdf5/Zmm131020/Zmm131020_0005.h5 ../../hdf5Prod/output/root2hdf5/Zmm131020/Zmm131020_0006.h5 ../../hdf5Prod/output/root2hdf5/Zmm131020/Zmm131020_0007.h5 ../../hdf5Prod/output/root2hdf5/Zmm131020/Zmm131020_0008.h5 ../../hdf5Prod/output/root2hdf5/Zmm131020/Zmm131020_0009.h5 ../../hdf5Prod/output/root2hdf5/bb310820/bb310820_0004.h5 ../../hdf5Prod/output/root2hdf5/bb310820/bb310820_0005.h5 ../../hdf5Prod/output/root2hdf5/bb310820/bb310820_0006.h5 ../../hdf5Prod/output/root2hdf5/bb310820/bb310820_0007.h5 ../../hdf5Prod/output/root2hdf5/bb310820/bb310820_0008.h5 ../../hdf5Prod/output/root2hdf5/bb310820/bb310820_0009.h5 ../../hdf5Prod/output/root2hdf5/Wmn310820/Wmn310820_0004.h5 ../../hdf5Prod/output/root2hdf5/Wmn310820/Wmn310820_0005.h5 ../../hdf5Prod/output/root2hdf5/Wmn310820/Wmn310820_0006.h5 ../../hdf5Prod/output/root2hdf5/Wmn310820/Wmn310820_0007.h5 ../../hdf5Prod/output/root2hdf5/Wmn310820/Wmn310820_0008.h5 ../../hdf5Prod/output/root2hdf5/Wmn310820/Wmn310820_0009.h5 2>&1 &> output/logCreateDataset220920.txt & disown
 
-nohup python -u createDataset.py --tag 151020_ZbbW ../../hdf5Prod/output/root2hdf5/Zmm151020/Zmm151020_0004.h5 ../../hdf5Prod/output/root2hdf5/Zmm151020/Zmm151020_0005.h5 ../../hdf5Prod/output/root2hdf5/Zmm151020/Zmm151020_0006.h5 ../../hdf5Prod/output/root2hdf5/Zmm151020/Zmm151020_0007.h5 ../../hdf5Prod/output/root2hdf5/Zmm151020/Zmm151020_0008.h5 ../../hdf5Prod/output/root2hdf5/Zmm151020/Zmm151020_0009.h5 ../../hdf5Prod/output/root2hdf5/bb151020/bb151020_0004.h5 ../../hdf5Prod/output/root2hdf5/bb151020/bb151020_0005.h5 ../../hdf5Prod/output/root2hdf5/bb151020/bb151020_0006.h5 ../../hdf5Prod/output/root2hdf5/bb151020/bb151020_0007.h5 ../../hdf5Prod/output/root2hdf5/bb151020/bb151020_0008.h5 ../../hdf5Prod/output/root2hdf5/bb151020/bb151020_0009.h5 ../../hdf5Prod/output/root2hdf5/Wmn151020/Wmn151020_0004.h5 ../../hdf5Prod/output/root2hdf5/Wmn151020/Wmn151020_0005.h5 ../../hdf5Prod/output/root2hdf5/Wmn151020/Wmn151020_0006.h5 ../../hdf5Prod/output/root2hdf5/Wmn151020/Wmn151020_0007.h5 ../../hdf5Prod/output/root2hdf5/Wmn151020/Wmn151020_0008.h5 ../../hdf5Prod/output/root2hdf5/Wmn151020/Wmn151020_0009.h5 2>&1 &> output/logCreateDataset151020.txt & disown
+nohup python -u createDataset.py --tag 20201103_ZbbW ../../hdf5Prod/output/root2hdf5/Zmm151020/Zmm151020_0004.h5 ../../hdf5Prod/output/root2hdf5/Zmm151020/Zmm151020_0005.h5 ../../hdf5Prod/output/root2hdf5/Zmm151020/Zmm151020_0006.h5 ../../hdf5Prod/output/root2hdf5/Zmm151020/Zmm151020_0007.h5 ../../hdf5Prod/output/root2hdf5/Zmm151020/Zmm151020_0008.h5 ../../hdf5Prod/output/root2hdf5/Zmm151020/Zmm151020_0009.h5 ../../hdf5Prod/output/root2hdf5/bb151020/bb151020_0004.h5 ../../hdf5Prod/output/root2hdf5/bb151020/bb151020_0005.h5 ../../hdf5Prod/output/root2hdf5/bb151020/bb151020_0006.h5 ../../hdf5Prod/output/root2hdf5/bb151020/bb151020_0007.h5 ../../hdf5Prod/output/root2hdf5/bb151020/bb151020_0008.h5 ../../hdf5Prod/output/root2hdf5/bb151020/bb151020_0009.h5 ../../hdf5Prod/output/root2hdf5/Wmn151020/Wmn151020_0004.h5 ../../hdf5Prod/output/root2hdf5/Wmn151020/Wmn151020_0005.h5 ../../hdf5Prod/output/root2hdf5/Wmn151020/Wmn151020_0006.h5 ../../hdf5Prod/output/root2hdf5/Wmn151020/Wmn151020_0007.h5 ../../hdf5Prod/output/root2hdf5/Wmn151020/Wmn151020_0008.h5 ../../hdf5Prod/output/root2hdf5/Wmn151020/Wmn151020_0009.h5 2>&1 &> output/logCreateDataset20201103.txt & disown
 
 """
 
@@ -360,6 +360,7 @@ def MakeFiles(arguments):
                 # Add event variables to array
                 data_temp[ 0, column_names.index( 'NvtxReco' ) ] = np.int(hf['NvtxReco'][event])
                 data_temp[ 0, column_names.index( 'correctedScaledAverageMu' ) ] = hf[ 'correctedScaledAverageMu' ][ event ]
+                data_temp[ 0, column_names.index( 'correctedScaledActualMu' ) ] = hf[ 'correctedScaledActualMu' ][ event ]
                 data_temp[ 0, column_names.index( 'eventWeight' ) ] = hf[ 'eventWeight' ][ event ]
                 data_temp[ 0, column_names.index( 'invM' ) ] = invM
                 data_temp[ 0, column_names.index( 'pt' ) ] = pt
@@ -438,6 +439,7 @@ selection_types = {1 : "Sig",
 
 column_dtype = {
 'correctedScaledAverageMu': float,
+'correctedScaledActualMu': float,
 'NvtxReco': float,
 'eventWeight':float,
 "invM" : float,

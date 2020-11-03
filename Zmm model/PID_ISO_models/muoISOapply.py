@@ -14,6 +14,9 @@ nohup python -u muoISOapply.py --tag 300920_ZbbW  output/ISOReweightFiles/110820
 
 nohup python -u muoISOapply.py --tag 081020_ZbbW  output/ISOReweightFiles/110820_ZbbW/combined_110820_train.h5 2>&1 &> output/logIsoApply.txt & disown
 
+nohup python -u muoISOapply.py --tag 20201028_toEGAM4  output/ISOReweightFiles/110820_ZbbW/combined_110820_train.h5 2>&1 &> output/logIsoApply.txt & disown
+
+
 """
 print("Program running...")
 
@@ -168,9 +171,9 @@ training_var = [
 # 'muo_sigmadeltaphi_1',
 # 'muo_sigmadeltatheta_0',
 # 'muo_sigmadeltatheta_1',
-'muo_neflowisolcoreConeEnergyCorrection',
-'muo_ptconecoreTrackPtrCorrection',
-'muo_topoetconecoreConeEnergyCorrection',
+'muo_neflowisolcoreConeEnergyCorrection', #does not exist in EGAM
+'muo_ptconecoreTrackPtrCorrection', #does not exist in EGAM
+'muo_topoetconecoreConeEnergyCorrection', #does not exist in EGAM
 ]
 
 #============================================================================

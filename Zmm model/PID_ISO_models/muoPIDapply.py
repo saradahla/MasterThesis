@@ -14,6 +14,8 @@ nohup python -u muoPIDapply.py --tag 300920_ZbbW  output/PIDReweightFiles/010920
 
 nohup python -u muoPIDapply.py --tag 081020_ZbbW  output/PIDReweightFiles/071020_ZbbW/combined_010920_train.h5 2>&1 &> output/logPidApply.txt & disown
 
+nohup python -u muoPIDapply.py --tag 20201028_toEGAM4  output/PIDReweightFiles/071020_ZbbW/combined_010920_train.h5 2>&1 &> output/logPidApply.txt & disown
+
 """
 print("Program running...")
 
@@ -151,12 +153,12 @@ training_var = [
 'muo_quality',
 # 'muo_LHMedium',
 # 'muo_LHTight',
-'muo_ET_TileCore', #MS Segments associated with the Muon
+# 'muo_ET_TileCore', #MS Segments associated with the Muon # Does not exist in EGAM
 'muo_MuonSpectrometerPt',
 # 'muo_deltaphi_0',
 # 'muo_deltaphi_1',
 # 'muo_deltatheta_0',
-'muo_deltatheta_1', #direction relative to track in ID
+# 'muo_deltatheta_1', #direction relative to track in ID # Does not exist in EGAM
 # 'muo_etconecoreConeEnergyCorrection',
 # 'muo_sigmadeltaphi_0',
 # 'muo_sigmadeltaphi_1',

@@ -111,7 +111,7 @@ def getRegularWeights(datatype, reweighter, data):
     total_weight = reweighter.predict_weights(np.array([data['eta'][data['label'] < 0.5],
                                                         data['pt'][data['label'] < 0.5],
                                                         data['invM'][data['label'] < 0.5],
-                                                        data['correctedScaledAverageMu'][data['label'] < 0.5]]).T)
+                                                        data['correctedScaledActualMu'][data['label'] < 0.5]]).T)
     log.info(f'Prediction of weights for {datatype} is done')
 
     # Get the ratio of sig and bkg weights to scale the bkg to have the same number of events ( after weighting )
@@ -139,7 +139,7 @@ def getReverseWeights(datatype, reweighter, data):
     total_weight = reweighter.predict_weights(np.array([data['eta'][data['label'] > 0.5],
                                                         data['pt'][data['label'] > 0.5],
                                                         data['invM'][data['label'] > 0.5],
-                                                        data['correctedScaledAverageMu'][data['label'] > 0.5]]).T)
+                                                        data['correctedScaledActualMu'][data['label'] > 0.5]]).T)
     log.info(f'Prediction of weights for {datatype} is done')
 
     # Get the ratio of sig and bkg weights to scale the signal to have the same number of events ( after weighting )
@@ -166,9 +166,9 @@ def GetISOscoreMu(gbm, data, muoNr):
                     f'muo{muoNr}_ptcone20',
                     f'muo{muoNr}_pt',
                     f'muo{muoNr}_etconecoreConeEnergyCorrection',
-                    f'muo{muoNr}_neflowisolcoreConeEnergyCorrection',
-                    f'muo{muoNr}_ptconecoreTrackPtrCorrection',
-                    f'muo{muoNr}_topoetconecoreConeEnergyCorrection']
+                    # f'muo{muoNr}_neflowisolcoreConeEnergyCorrection',
+                    # f'muo{muoNr}_ptconecoreTrackPtrCorrection',
+                    # f'muo{muoNr}_topoetconecoreConeEnergyCorrection']
     score = gbm.predict(data[training_var], n_jobs=args.max_processes)
     return logit(score)
 
@@ -176,9 +176,9 @@ def GetPIDscoreMu(gbm, data, muoNr):
     training_var = [f'muo{muoNr}_numberOfPrecisionLayers',
                     f'muo{muoNr}_numberOfPrecisionHoleLayers',
                     f'muo{muoNr}_quality',
-                    f'muo{muoNr}_ET_TileCore',
+                    # f'muo{muoNr}_ET_TileCore',
                     f'muo{muoNr}_MuonSpectrometerPt',
-                    f'muo{muoNr}_deltatheta_1',
+                    # f'muo{muoNr}_deltatheta_1',
                     f'muo{muoNr}_scatteringCurvatureSignificance', # PID
                     f'muo{muoNr}_scatteringNeighbourSignificance', # PID
                     f'muo{muoNr}_momentumBalanceSignificance', # PID
@@ -354,11 +354,11 @@ for iWeight, weightName in enumerate(reweightNames):
     reweighter.fit(original = np.array([data_train['eta'][trainMask & (data_train["label"] < 0.5)],
                                         data_train['pt'][trainMask & (data_train["label"] < 0.5)],
                                         data_train['invM'][trainMask & (data_train["label"] < 0.5)],
-                                        data_train['correctedScaledAverageMu'][trainMask & (data_train["label"] < 0.5)]]).T,
+                                        data_train['correctedScaledActualMu'][trainMask & (data_train["label"] < 0.5)]]).T,
                    target   = np.array([data_train['eta'][trainMask & (data_train["label"] >= 0.5)],
                                         data_train['pt'][trainMask & (data_train["label"] >= 0.5)],
                                         data_train['invM'][trainMask & (data_train["label"] >= 0.5)],
-                                        data_train['correctedScaledAverageMu'][trainMask & (data_train["label"] >= 0.5)]]).T)
+                                        data_train['correctedScaledActualMu'][trainMask & (data_train["label"] >= 0.5)]]).T)
     log.info(f"Fitting of weights is done (time: {timedelta(seconds=time() - t)})")
 
     # Get weights
@@ -397,11 +397,11 @@ for iWeight, weightName in enumerate(reweightNames):
     reweighter.fit(original = np.array([data_train['eta'][trainMask & (data_train["label"] > 0.5)],
                                         data_train['pt'][trainMask & (data_train["label"] > 0.5)],
                                         data_train['invM'][trainMask & (data_train["label"] > 0.5)],
-                                        data_train['correctedScaledAverageMu'][trainMask & (data_train["label"] > 0.5)]]).T,
+                                        data_train['correctedScaledActualMu'][trainMask & (data_train["label"] > 0.5)]]).T,
                    target   = np.array([data_train['eta'][trainMask & (data_train["label"] <= 0.5)],
                                         data_train['pt'][trainMask & (data_train["label"] <= 0.5)],
                                         data_train['invM'][trainMask & (data_train["label"] <= 0.5)],
-                                        data_train['correctedScaledAverageMu'][trainMask & (data_train["label"] <= 0.5)]]).T)
+                                        data_train['correctedScaledActualMu'][trainMask & (data_train["label"] <= 0.5)]]).T)
     log.info(f"Fitting of weights is done (time: {timedelta(seconds=time() - t)})")
 
     # Get weights
@@ -447,7 +447,7 @@ with h5py.File(filename_test, 'w') as hf:
 masks = [trainMask, validMask]
 maskNames = ["train", "valid"]
 maskLabel = ["Training set", "Validation set"]
-variables = ["eta", "pt", "invM", "correctedScaledAverageMu"]
+variables = ["eta", "pt", "invM", "correctedScaledActualMu"]
 bins = [120, 120, 120, 80]
 ranges = [(-4, 4), (-5, 120), (50, 110), (-2, 80)]
 xlabel = [r"$\eta$", "pt", "invM", r"$\langle\mu\rangle$"]
@@ -485,7 +485,7 @@ for iMask, mask in enumerate(masks):
                     fig, ax[i] = Plot(Histogram(data_train[var][mask], data_train["label"][mask], data_train[weightType+"_"+weightName][mask], bin, rang[0], rang[1]), fig, ax[i], xlab, includeN = True)
                     #fig, ax[1] = Plot(Histogram(data_train['pt'][mask], data_train["label"][mask], data_train[weightType+"_"+weightName][mask], 120, -5, 120), fig, ax[1], "pt", includeN = False)
                     #fig, ax[2] = Plot(Histogram(data_train['invM'][mask], data_train["label"][mask], data_train[weightType+"_"+weightName][mask], 120, 50, 110), fig, ax[2], "invM", includeN = False)
-                    #fig, ax[3] = Plot(Histogram(data_train['correctedScaledAverageMu'][mask], data_train["label"][mask], data_train[weightType+"_"+weightName][mask], 80, -2, 80), fig, ax[3], r"$\langle\mu\rangle$", includeN = False)
+                    #fig, ax[3] = Plot(Histogram(data_train['correctedScaledActualMu'][mask], data_train["label"][mask], data_train[weightType+"_"+weightName][mask], 80, -2, 80), fig, ax[3], r"$\langle\mu\rangle$", includeN = False)
 
             counts_weight, edges_weight = np.histogram(data_train[weightType+"_"+weightName][mask], bins=120, range=(0, 40))
             ax[4].step(x=edges_weight, y=np.append(counts_weight, 0), where="post", color = "k");
@@ -504,7 +504,7 @@ for iMask, mask in enumerate(masks):
 #     fig, ax[0] = Plot(Histogram(data_train['eta'][validMask], data_train["label"][validMask], w, 120, -4, 4), fig, ax[0], r"$\eta$", includeN = True)
 #     fig, ax[1] = Plot(Histogram(data_train['pt'][validMask], data_train["label"][validMask], w, 120, -5, 120), fig, ax[1], "pt", includeN = False)
 #     fig, ax[2] = Plot(Histogram(data_train['invM'][validMask], data_train["label"][validMask], w, 120, 50, 110), fig, ax[2], "invM", includeN = False)
-#     fig, ax[3] = Plot(Histogram(data_train['correctedScaledAverageMu'][validMask], data_train["label"][validMask], w, 80, -2, 80), fig, ax[3], r"$\langle\mu\rangle$", includeN = False)
+#     fig, ax[3] = Plot(Histogram(data_train['correctedScaledActualMu'][validMask], data_train["label"][validMask], w, 80, -2, 80), fig, ax[3], r"$\langle\mu\rangle$", includeN = False)
 #
 #     counts_weight, edges_weight = np.histogram(w, bins=120, range=(0, 40))
 #     ax[4].step(x=edges_weight, y=np.append(counts_weight, 0), where="post", color = "k");
